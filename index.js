@@ -43,17 +43,18 @@ fs.readFile(filename, {encoding: 'utf-8'}, function(err,data) {
                         .filter((_, i) => i >= offset && i < nTickers + offset);
       (async () => {
         const browser = await puppeteer.launch();
+        const similarTickersArr = [];
 
         for (let i = 0; i < tickers.length; i++) {
           let similarTickers = await getSimilarTickers(browser, tickers[i]);
           // console.log(`Similar Tickers to ${tickers[i]} are ${similarTickers.join(', ')}`);
-          let similarTickersStr = `${tickers[i]},${similarTickers.join(',')}`;
-
-          // add a line to a lyric file, using appendFile
-          fs.appendFile(outputFileName, `${similarTickersStr}\n`, (err) => {
-            if (err) throw err;
-          });
+          similarTickersArr.push(`${tickers[i]},${similarTickers.join(',')}`);
         }
+
+        // add a line to a lyric file, using appendFile
+        fs.writeFile(outputFileName, similarTickersArr.join('\n'), (err) => {
+          if (err) throw err;
+        });
 
         await browser.close();
       })();
@@ -70,10 +71,10 @@ async function getSimilarTickers(browser, ticker) {
   const page = await browser.newPage();
   const getTickerUrl = ticker => `https://finance.yahoo.com/quote/${ticker}?p=${ticker}`;
 
-  await page.goto(getTickerUrl(ticker));
+  await page.goto(getTickerUrl(ticker), { waitUntil: 'networkidle2' });
 
   const similarTickers = await page.evaluate((ticker) => {
-    const symbols = window.App.main.context.dispatcher.stores.RecommendationStore.recommendedSymbols[ticker]
+    const symbols = window.App.main.context.dispatcher.stores.RecommendationStore.recommendedSymbols[ticker];
     return symbols.map(symbols => symbols.symbol);
   }, ticker);
 
