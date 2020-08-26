@@ -70,8 +70,6 @@ async function getSimilarTickers(browser, ticker) {
   const page = await browser.newPage();
   const getTickerUrl = ticker => `https://finance.yahoo.com/quote/${ticker}?p=${ticker}`;
 
-  console.log("here....");
-
   await page.goto(getTickerUrl(ticker));
 
   const similarTickers = await page.evaluate((ticker) => {
