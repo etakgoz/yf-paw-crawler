@@ -1,7 +1,9 @@
 /**
  * Reads tickers CSV file and crawls similar tickers from Yahoo Finance
  * 
- * ex: node index.js tickers.csv offset n_tickers
+ * ex: node index.js tickers.csv [offset] [n_tickers]
+ * output saved to a file named similar_tickers_[offset]_[n_tickers].csv
+ * Each lines has the format: Ticker, SimilarTicker0, SimilarTicker1, SimilarTicker2, SimilarTicker3, SimilarTicker4, SimilarTicker5
  */
 
 const fs = require('fs');
@@ -60,7 +62,6 @@ fs.readFile(filename, {encoding: 'utf-8'}, function(err,data) {
       console.log(err);
   }
 });
-console.log(`filename: ${filename} offset: ${offset} nTickers: ${nTickers}`);
 
 
 // Reads similar tickers from App data in global context
@@ -69,7 +70,9 @@ async function getSimilarTickers(browser, ticker) {
   const page = await browser.newPage();
   const getTickerUrl = ticker => `https://finance.yahoo.com/quote/${ticker}?p=${ticker}`;
 
-  await page.goto(getTickerUrl(ticker) );
+  console.log("here....");
+
+  await page.goto(getTickerUrl(ticker));
 
   const similarTickers = await page.evaluate((ticker) => {
     const symbols = window.App.main.context.dispatcher.stores.RecommendationStore.recommendedSymbols[ticker]
