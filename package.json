@@ -1,0 +1,14 @@
+{
+  "name": "yf-paw-crawler",
+  "version": "1.0.0",
+  "description": "Crawls Yahoo Finance People Also Watch Tickers for given tickers",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tolga Akgoz",
+  "license": "ISC",
+  "dependencies": {
+    "puppeteer": "^5.2.1"
+  }
+}
