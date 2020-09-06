@@ -1,5 +1,12 @@
+.DS_Store
 node_modules
 .vscode
 
 # output files
 similar_*.csv
+
+# Ignore contents of the data directory
+data/*
+!data/.gitkeep
+
+TODO.md
