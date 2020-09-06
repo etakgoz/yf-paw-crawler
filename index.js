@@ -45,13 +45,23 @@ fs.readFile(filename, {encoding: 'utf-8'}, function(err,data) {
         const browser = await puppeteer.launch();
         const similarTickersArr = [];
 
+        console.time("similarTickers");
         for (let i = 0; i < tickers.length; i++) {
+          if (i % 10 === 0) {
+            console.log(`Completed ${i} tickers. Processing ${tickers[i]}...`);
+          }
+
           let similarTickers = await getSimilarTickers(browser, tickers[i]);
+
+          if (similarTickers.length === 0) {
+            similarTickers = await getSimilarTickers(browser, tickers[i]); // try again
+          }
+
           // console.log(`Similar Tickers to ${tickers[i]} are ${similarTickers.join(', ')}`);
           similarTickersArr.push(`${tickers[i]},${similarTickers.join(',')}`);
         }
+        console.timeEnd("similarTickers");
 
-        // add a line to a lyric file, using appendFile
         fs.writeFile(outputFileName, similarTickersArr.join('\n'), (err) => {
           if (err) throw err;
         });
@@ -74,9 +84,19 @@ async function getSimilarTickers(browser, ticker) {
   await page.goto(getTickerUrl(ticker), { waitUntil: 'networkidle2' });
 
   const similarTickers = await page.evaluate((ticker) => {
-    const symbols = window.App.main.context.dispatcher.stores.RecommendationStore.recommendedSymbols[ticker];
-    return symbols.map(symbols => symbols.symbol);
+    try {
+      const symbols = window.App.main.context.dispatcher.stores.RecommendationStore.recommendedSymbols[ticker];
+      return symbols.map(symbols => symbols.symbol);
+    } catch (e) {
+      return [];
+    }
   }, ticker);
 
   return similarTickers;
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
